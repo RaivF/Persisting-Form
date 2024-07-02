@@ -1,4 +1,3 @@
-// server.js
 const express = require('express')
 const bodyParser = require('body-parser')
 const fs = require('fs')
@@ -15,9 +14,12 @@ if (!fs.existsSync(dataFilePath)) {
 	fs.writeFileSync(
 		dataFilePath,
 		JSON.stringify({
-			step1: { field1: '', field2: '', field3: '' },
-			step2: { field4: '', field5: '', field6: '' },
-			step3: { field7: '', field8: '', field9: '' },
+			formData: {
+				step1: { field1: '', field2: '', field3: '' },
+				step2: { field4: '', field5: '', field6: '' },
+				step3: { field7: '', field8: '', field9: '' },
+			},
+			lastModified: { userId: '', time: '' },
 		}),
 		'utf8'
 	)
@@ -33,11 +35,18 @@ app.get('/api/form-data', (req, res) => {
 })
 
 app.post('/api/form-data', (req, res) => {
-	fs.writeFile(dataFilePath, JSON.stringify(req.body), 'utf8', err => {
+	const { formData, userId, timestamp } = req.body
+
+	const newData = {
+		formData,
+		lastModified: { userId, time: timestamp },
+	}
+
+	fs.writeFile(dataFilePath, JSON.stringify(newData), 'utf8', err => {
 		if (err) {
 			return res.status(500).send(err)
 		}
-		res.json(req.body)
+		res.json(newData)
 	})
 })
 
